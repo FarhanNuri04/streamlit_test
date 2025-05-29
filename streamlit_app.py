@@ -2,12 +2,13 @@ import streamlit as st
 import requests
 
 # Set the app title 
-st.title('SIGMA BROTHERS CLUB !!')
-st.title('Only Sigmas Can Join !!')
+st.title('FISA Dynamics SDN BHD')
+st.title('LEAD By FarhanNuri')
 
 # Add a welcome message 
-st.write('RANI KULUP')
-
+st.write('Left Hand : Syahmi Amirul')
+st.write('Right Hand : Iddin Tod')
+st.write('Co Pilot : Arif Akmal')
 # Create a text input 
 widgetuser_input = st.text_input('Enter a custom message:', 'Hello, Streamlit!') 
 
