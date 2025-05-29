@@ -2,7 +2,8 @@ import streamlit as st
 import requests
 
 # Set the app title 
-st.title('Aboy SIGMA !!') 
+st.title('SIGMA BROTHERS CLUB !!')
+st.title('Only Sigmas Can Join !!')
 
 # Add a welcome message 
 st.write('RANI KULUP')
