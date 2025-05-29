@@ -28,7 +28,7 @@ st.subheader('🚀 LEAD By FarhanNuri')
 
 # Welcome team members
 st.write('🫱 Left Hand: Syahmi Amirul')
-st.write('🫲 Right Hand: Iddin Tod')
+st.write('🫲 Right Hand: Iddin ')
 st.write('🧭 Co Pilot: Arif Akmal')
 
 # Text input from user
