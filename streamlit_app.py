@@ -6,7 +6,7 @@ import altair as alt
 # ========== Streamlit UI Setup ==========
 st.set_page_config(page_title="Movie Explorer", layout="centered")
 
-# ========== Background Styling ==========gg
+# ========== Background Styling ==========
 st.markdown("""
     <style>
     body {
@@ -46,7 +46,7 @@ API_KEY = "4f658b3a4df357c0e36dea39fe745497"  # Replace with your own TMDb API k
 # ========== Search Input & Year Filter ==========
 col1, col2 = st.columns([3, 1])
 with col1:
-    query = st.text_input("Enter a movie title:", "")
+    query = st.text_input("Enter a movie TITLE:", "")
 with col2:
     year_filter = st.text_input("Year (optional):", "")
 
