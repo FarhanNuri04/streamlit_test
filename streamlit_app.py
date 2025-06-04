@@ -2,10 +2,9 @@ import streamlit as st
 import requests
 import pandas as pd
 import altair as alt
-from datetime import datetime
 
 # ========== Streamlit UI Setup ==========
-st.set_page_config(page_title="  Movie Explorer", layout="centered")
+st.set_page_config(page_title="Movie Explorer", layout="centered")
 
 # ========== Background Styling ==========
 st.markdown("""
@@ -33,28 +32,26 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-
 # ========== App Title ==========
-st.title("  :rainbow[Movie Explorer App]")
+st.title(":rainbow[Movie Explorer App]")
 st.markdown("Search movies by title or browse categories. Explore storyline, stats, trailer, and submit a review.")
 
 # ========== User Name ==========
 user_name = st.text_input("Enter your name:", "Guest")
-st.markdown(f"  Hello, {user_name}! Let's explore some movies.")
+st.markdown(f"Hello, {user_name}! Let's explore some movies.")
 
 # ========== TMDb API ==========
-API_KEY = "4f658b3a4df357c0e36dea39fe745497"  # Ganti dgn API key sendiri
+API_KEY = "4f658b3a4df357c0e36dea39fe745497"  # Replace with your own TMDb API key
 
-# ========== Search Inputs ==========
+# ========== Search Input & Year Filter ==========
 col1, col2 = st.columns([3, 1])
 with col1:
     query = st.text_input("Enter a movie title:", "")
 with col2:
-    current_year = datetime.now().year
-    year = st.selectbox("Year:", options=["Any"] + list(range(current_year, 1950, -1)))
+    year_filter = st.text_input("Year (optional):", "")
 
 # ========== Category Dropdown ==========
-st.markdown("##   Browse by Category")
+st.markdown("## Browse by Category")
 category = st.selectbox("Or select a category:", ["Popular", "Now Playing", "Upcoming", "Top Rated"])
 category_map = {
     "Popular": "popular",
@@ -64,9 +61,9 @@ category_map = {
 }
 
 # ========== TMDb API Functions ==========
-def search_movie(query, year, api_key):
+def search_movie(query, api_key, year=None):
     url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}"
-    if year != "Any":
+    if year:
         url += f"&year={year}"
     return requests.get(url).json()
 
@@ -102,10 +99,12 @@ if query.strip() == "":
                 st.image(f"https://image.tmdb.org/t/p/w200{movie['poster_path']}", use_container_width=True)
             st.caption(movie.get("overview", "No overview available."))
 else:
+    # ========== Search Result ==========
     if st.button("Search Movie"):
-        search_result = search_movie(query, year, API_KEY)
+        search_result = search_movie(query, API_KEY, year_filter)
+
         if "results" not in search_result or len(search_result["results"]) == 0:
-            st.error("  No movie found with that title.")
+            st.error("No movie found with that title.")
         else:
             movie = search_result["results"][0]
             movie_id = movie["id"]
@@ -113,10 +112,14 @@ else:
             credits = get_movie_credits(movie_id, API_KEY)
             trailer_url = get_movie_trailer(movie_id, API_KEY)
 
+            # Director
             director = next((m["name"] for m in credits.get("crew", []) if m["job"] == "Director"), "Unknown")
+
+            # Top Cast
             cast_list = credits.get("cast", [])
             top_cast = ", ".join([actor["name"] for actor in cast_list[:3]]) if cast_list else "N/A"
 
+            # Movie Info
             st.subheader(f"🎞 {details['title']} ({details.get('release_date', '')[:4]})")
             if details.get("poster_path"):
                 st.image(f"https://image.tmdb.org/t/p/w500{details['poster_path']}")
@@ -127,17 +130,19 @@ else:
             st.markdown(f"Vote Average: {details['vote_average']}")
             st.markdown(f"Total Votes: {details['vote_count']}")
 
+            # Trailer
             if trailer_url:
-                st.subheader("  Watch Trailer")
+                st.subheader("Watch Trailer")
                 st.video(trailer_url)
             else:
                 st.info("No trailer available.")
 
+            # Chart: Ratings
             vote_data = pd.DataFrame({
                 "Metric": ["Average Rating", "Vote Count"],
                 "Value": [details["vote_average"], details["vote_count"]]
             })
-            st.subheader("  Rating and Vote Count")
+            st.subheader("Rating and Vote Count")
             st.altair_chart(
                 alt.Chart(vote_data).mark_bar().encode(
                     x="Metric",
@@ -147,9 +152,10 @@ else:
                 ).properties(width=600)
             )
 
+            # Chart: Genre
             genres = [g["name"] for g in details["genres"]]
             genre_df = pd.DataFrame({"Genre": genres, "Count": [1]*len(genres)})
-            st.subheader("  Genre Breakdown")
+            st.subheader("Genre Breakdown")
             st.altair_chart(
                 alt.Chart(genre_df).mark_arc().encode(
                     theta="Count",
@@ -158,10 +164,12 @@ else:
                 )
             )
 
+            # Review Section
             st.markdown("---")
-            st.subheader("  Your Review")
+            st.subheader("Your Review")
             with st.form("review_form"):
                 user_review = st.text_area("Write your review here (optional):", "")
+
                 rating_options = {
                     "☆☆☆☆☆ (0)": 0,
                     " ☆☆☆☆ (1)": 1,
@@ -172,15 +180,16 @@ else:
                 }
                 rating_labels = list(rating_options.keys())
                 default_index = 5
+
                 selected_label = st.radio("Rate this movie:", rating_labels, index=default_index, horizontal=True)
                 star_rating = rating_options.get(selected_label, 0)
+
                 submitted = st.form_submit_button("Submit Review")
                 if submitted:
-                    st.success("  Thank you for your review!")
-                    st.markdown(f"  Reviewed by: *{user_name}*")
-                    st.markdown(f"  Your Rating: *{star_rating} / 5*")
+                    st.success("Thank you for your review!")
+                    st.markdown(f"Reviewed by: *{user_name}*")
+                    st.markdown(f"Your Rating: *{star_rating} / 5*")
                     if user_review.strip():
-                        st.markdown(f"  Your Review: *{user_review}*")
+                        st.markdown(f"Your Review: *{user_review}*")
                     else:
                         st.markdown("No written review provided.")
-
