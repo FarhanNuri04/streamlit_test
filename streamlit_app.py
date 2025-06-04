@@ -11,13 +11,13 @@ st.set_page_config(page_title="  Movie Explorer", layout="centered")
 st.markdown("""
     <style>
     body {
-        background: linear-gradient(-45deg, #1e1e2f, #2a2a3f, #1a1a2e, #10101a);
+        background: linear-gradient(135deg, #ff6ec4, #7873f5, #3aeabb, #fdd819);
         background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
+        animation: gradientBG 12s ease infinite;
         color: white;
     }
     .stApp {
-        background-color: rgba(0, 0, 0, 0.6);
+        background-color: rgba(0, 0, 0, 0.7);
         border-radius: 15px;
         padding: 20px;
         font-family: 'Segoe UI', sans-serif;
@@ -32,6 +32,7 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+
 
 # ========== App Title ==========
 st.title("  :rainbow[Movie Explorer App]")
