@@ -4,6 +4,12 @@ import pandas as pd
 import altair as alt
 from textblob import TextBlob
 
+import nltk
+nltk.download('brown')
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('averaged_perceptron_tagger')
+
 # ========== Streamlit UI Setup ==========
 st.set_page_config(page_title="Movie Explorer", layout="centered")
 
