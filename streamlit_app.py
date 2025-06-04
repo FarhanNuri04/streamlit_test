@@ -6,7 +6,7 @@ import altair as alt
 # ========== Streamlit UI Setup ==========
 st.set_page_config(page_title="Movie Explorer", layout="centered")
 
-# ========== Background Styling ==========
+# ========== Background Styling ==========gg
 st.markdown("""
     <style>
     body {
