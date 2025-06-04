@@ -9,25 +9,27 @@ st.set_page_config(page_title="Movie Explorer", layout="centered")
 # ========== Background Styling ==========
 st.markdown("""
     <style>
-    body {
-        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fad0c4, #fbc2eb, #a18cd1);
+    .stApp {
+        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
         background-size: 400% 400%;
         animation: gradientBG 15s ease infinite;
         color: white;
-    }
-    .stApp {
-        background-color: rgba(0, 0, 0, 0.6);
+        padding: 2rem;
         border-radius: 15px;
-        padding: 20px;
-        font-family: 'Segoe UI', sans-serif;
     }
-    h1, h2, h3, h4, h5, h6, .stMarkdown {
-        color: #ffffff !important;
-    }
+
     @keyframes gradientBG {
         0% {background-position: 0% 50%;}
         50% {background-position: 100% 50%;}
         100% {background-position: 0% 50%;}
+    }
+
+    html, body, [data-testid="stAppViewContainer"] {
+        background-color: transparent !important;
+    }
+
+    h1, h2, h3, h4, h5, h6, .stMarkdown {
+        color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
