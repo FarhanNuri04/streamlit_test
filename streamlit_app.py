@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import altair as alt
+import difflib
 
 # ========== Streamlit UI Setup ==========
 st.set_page_config(page_title="Movie Explorer", layout="centered")
@@ -10,7 +11,7 @@ st.set_page_config(page_title="Movie Explorer", layout="centered")
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+        background: linear-gradient(-45deg, #141e30, #243b55);
         background-size: 400% 400%;
         animation: gradientBG 15s ease infinite;
         color: white;
@@ -28,8 +29,29 @@ st.markdown("""
         background-color: transparent !important;
     }
 
-    h1, h2, h3, h4, h5, h6, .stMarkdown {
+    h1, h2, h3, h4, h5, h6, .stMarkdown, .stTextInput>div>div>input {
         color: #ffffff !important;
+    }
+
+    button[kind="secondary"] {
+        color: white !important;
+    }
+
+    .stRadio > div {
+        flex-direction: row !important;
+        gap: 10px;
+    }
+
+    .stRadio label {
+        background: rgba(255,255,255,0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+
+    .stRadio input:checked + label {
+        background: #ff4b4b;
+        color: white;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -43,7 +65,7 @@ user_name = st.text_input("Enter your name:", "Guest")
 st.markdown(f"  Hello, {user_name}! Let's explore some movies.")
 
 # ========== TMDb API ==========
-API_KEY = "4f658b3a4df357c0e36dea39fe745497"  # Replace with your own TMDb API key
+API_KEY = "4f658b3a4df357c0e36dea39fe745497"
 
 # ========== Movie Search & Year ==========
 col1, col2 = st.columns([3, 1])
@@ -89,6 +111,17 @@ def get_movies_by_category(category_key, api_key):
     url = f"https://api.themoviedb.org/3/movie/{category_key}?api_key={api_key}&language=en-US&page=1"
     return requests.get(url).json().get("results", [])
 
+def get_all_titles(api_key):
+    url = f"https://api.themoviedb.org/3/movie/popular?api_key={api_key}&language=en-US&page=1"
+    results = requests.get(url).json().get("results", [])
+    return [movie["title"] for movie in results]
+
+# ========== Auto-correct title ==========
+def correct_title(input_title, api_key):
+    titles = get_all_titles(api_key)
+    match = difflib.get_close_matches(input_title, titles, n=1, cutoff=0.5)
+    return match[0] if match else input_title
+
 # ========== Handle Category Browse ==========
 if query.strip() == "":
     st.markdown(f"### 🎞 {category} Movies")
@@ -102,7 +135,8 @@ if query.strip() == "":
             st.caption(movie.get("overview", "No overview available."))
 else:
     if st.button("Search Movie"):
-        search_result = search_movie(query, API_KEY, year_filter)
+        corrected_query = correct_title(query, API_KEY)
+        search_result = search_movie(corrected_query, API_KEY, year_filter)
 
         if "results" not in search_result or len(search_result["results"]) == 0:
             st.error("  No movie found with that title.")
@@ -168,23 +202,9 @@ else:
             # Review Section
             st.markdown("---")
             st.subheader("  Your Review")
-            with st.form("review_form"):
+            with st.form("review_form", clear_on_submit=False):
                 user_review = st.text_area("Write your review here (optional):", "")
-
-                rating_options = {
-                    "☆☆☆☆☆ (0)": 0,
-                    " ☆☆☆☆ (1)": 1,
-                    "  ☆☆☆ (2)": 2,
-                    "   ☆☆ (3)": 3,
-                    "    ☆ (4)": 4,
-                    "      (5)": 5
-                }
-                rating_labels = list(rating_options.keys())
-                default_index = 5
-
-                selected_label = st.radio("Rate this movie:", rating_labels, index=default_index, horizontal=True)
-                star_rating = rating_options.get(selected_label, 0)
-
+                star_rating = st.radio("Rate this movie:", [0, 1, 2, 3, 4, 5], index=5, format_func=lambda x: "★" * x + "☆" * (5 - x))
                 submitted = st.form_submit_button("Submit Review")
                 if submitted:
                     st.success("  Thank you for your review!")
@@ -194,3 +214,4 @@ else:
                         st.markdown(f"  Your Review: *{user_review}*")
                     else:
                         st.markdown("No written review provided.")
+
